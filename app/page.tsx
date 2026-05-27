@@ -4,6 +4,7 @@ import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import About from "@/components/About";
 import VibeLab from "@/components/VibeLab";
+import Soundtrack from "@/components/Soundtrack";
 import Sandbox from "@/components/Sandbox";
 import Skills from "@/components/Skills";
 import Setup from "@/components/Setup";
@@ -17,6 +18,7 @@ export default function Home() {
         <Hero />
         <About />
         <VibeLab />
+        <Soundtrack />
         <Sandbox />
         <Skills />
         <Setup />
