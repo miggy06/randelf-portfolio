@@ -55,6 +55,20 @@ export default function Soundtrack() {
   const defaultTrack = OFFLINE_TRACKS[currentTrackIdx];
 
   // =========================================
+  // Load Cached Track on Mount (Client-only)
+  // =========================================
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("lastPlayedSpotifyTrack");
+      if (saved) {
+        setSpotifyData(JSON.parse(saved));
+      }
+    } catch (e) {
+      console.warn("Failed to load last played track from localStorage:", e);
+    }
+  }, []);
+
+  // =========================================
   // Spotify Poll Effect
   // =========================================
   useEffect(() => {
@@ -63,11 +77,34 @@ export default function Soundtrack() {
         const response = await fetch("/api/now-playing");
         if (response.ok) {
           const data = await response.json();
-          setSpotifyData(data);
-          
-          if (data.isPlaying) {
-            // Stop offline synth if Spotify starts playing
-            setIsPlaying(false);
+          if (data.title) {
+            // We have a track. Update state and save to cache.
+            setSpotifyData(data);
+            try {
+              localStorage.setItem("lastPlayedSpotifyTrack", JSON.stringify(data));
+            } catch (e) {
+              console.warn("Failed to save track to localStorage:", e);
+            }
+            
+            if (data.isPlaying) {
+              // Stop offline synth if Spotify starts playing
+              setIsPlaying(false);
+            }
+          } else {
+            // Spotify is inactive (204 or no active track).
+            // Keep the last played track but mark it as paused.
+            setSpotifyData((prev) => {
+              if (prev) {
+                const pausedPrev = { ...prev, isPlaying: false };
+                try {
+                  localStorage.setItem("lastPlayedSpotifyTrack", JSON.stringify(pausedPrev));
+                } catch (e) {
+                  console.warn("Failed to update track in localStorage:", e);
+                }
+                return pausedPrev;
+              }
+              return null;
+            });
           }
         }
       } catch (e) {
@@ -86,15 +123,23 @@ export default function Soundtrack() {
   useEffect(() => {
     let interval: NodeJS.Timeout;
 
-    if (spotifyData?.isPlaying && spotifyData.progressMs && spotifyData.durationMs) {
-      // Direct Spotify Progress calculation & local increment
-      let localProgressMs = spotifyData.progressMs;
-      const duration = spotifyData.durationMs;
+    if (spotifyData && spotifyData.title) {
+      const duration = spotifyData.durationMs || 1;
+      const currentProgress = spotifyData.progressMs || 0;
 
-      interval = setInterval(() => {
-        localProgressMs = Math.min(localProgressMs + 1000, duration);
+      if (spotifyData.isPlaying) {
+        // Direct Spotify Progress calculation & local increment
+        let localProgressMs = currentProgress;
         setProgress((localProgressMs / duration) * 100);
-      }, 1000);
+
+        interval = setInterval(() => {
+          localProgressMs = Math.min(localProgressMs + 1000, duration);
+          setProgress((localProgressMs / duration) * 100);
+        }, 1000);
+      } else {
+        // Spotify is paused: set static progress once
+        setProgress((currentProgress / duration) * 100);
+      }
     } else if (isPlaying) {
       // Offline ambient progress simulation
       interval = setInterval(() => {
@@ -107,14 +152,16 @@ export default function Soundtrack() {
         });
       }, 500);
     }
-    return () => clearInterval(interval);
+    return () => {
+      if (interval) clearInterval(interval);
+    };
   }, [isPlaying, spotifyData]);
 
   // =========================================
   // Web Audio Synth Loops
   // =========================================
   useEffect(() => {
-    if (isPlaying && !isMuted && !spotifyData?.isPlaying) {
+    if (isPlaying && !isMuted && (!spotifyData || !spotifyData.isPlaying)) {
       startSynth();
     } else {
       stopSynth();
@@ -173,18 +220,18 @@ export default function Soundtrack() {
   };
 
   const handlePlayPause = () => {
-    if (spotifyData?.isPlaying) return; // Disable play toggle when Spotify handles it
+    if (isLiveSpotify) return; // Disable play toggle when Spotify is active
     setIsPlaying(!isPlaying);
   };
 
   const handleNext = () => {
-    if (spotifyData?.isPlaying) return;
+    if (isLiveSpotify) return;
     setProgress(0);
     setCurrentTrackIdx((prev) => (prev + 1) % OFFLINE_TRACKS.length);
   };
 
   const handlePrev = () => {
-    if (spotifyData?.isPlaying) return;
+    if (isLiveSpotify) return;
     setProgress(0);
     setCurrentTrackIdx((prev) => (prev - 1 + OFFLINE_TRACKS.length) % OFFLINE_TRACKS.length);
   };
@@ -193,7 +240,9 @@ export default function Soundtrack() {
     setIsMuted(!isMuted);
   };
 
-  const isLiveSpotify = !!(spotifyData?.isPlaying);
+  const isLiveSpotify = spotifyData ? (spotifyData.title !== undefined) : false;
+  const isSpotifyPlaying = spotifyData?.isPlaying;
+  const isActivelyPlaying = isPlaying || (isLiveSpotify && !!isSpotifyPlaying);
 
   return (
     <section id="soundtrack" className="py-24 border-t border-border-light dark:border-border-dark">
@@ -205,15 +254,25 @@ export default function Soundtrack() {
             Audio Ambient
           </span>
           <h2 className="text-3xl sm:text-4xl font-heading font-bold text-primary-light dark:text-primary-dark tracking-tight mb-6">
-            {isLiveSpotify ? "Now Playing on Spotify" : "The Coding Soundtrack"}
+            {isLiveSpotify 
+              ? (isSpotifyPlaying ? "Now Playing on Spotify" : "Paused on Spotify") 
+              : "The Coding Soundtrack"}
           </h2>
           <p className="text-secondary-light dark:text-secondary-dark text-[0.98rem] leading-relaxed mb-6">
             {isLiveSpotify ? (
-              <>
-                The player is currently connected and streaming my live Spotify activity! 
-                Whenever I play a track on my Spotify app, it updates this card in real time. 
-                Click the player details to listen along with me.
-              </>
+              isSpotifyPlaying ? (
+                <>
+                  The player is currently connected and streaming my live Spotify activity! 
+                  Whenever I play a track on my Spotify app, it updates this card in real time. 
+                  Click the player details to listen along with me.
+                </>
+              ) : (
+                <>
+                  My Spotify player is currently paused. 
+                  You can see the last track I was listening to. 
+                  Click the player details to open the track directly on Spotify.
+                </>
+              )
             ) : (
               <>
                 Music is a core part of my software development experience. 
@@ -228,8 +287,8 @@ export default function Soundtrack() {
           <div className="flex items-center gap-2 text-xs px-3 py-1.5 rounded-md border border-border-light dark:border-border-dark text-tertiary-light dark:text-tertiary-dark bg-input-light/30 dark:bg-input-dark/30">
             {isLiveSpotify ? (
               <>
-                <Radio className="w-3.5 h-3.5 text-green-500 animate-pulse" />
-                Live Sync Active via Spotify Web API
+                <Radio className={`w-3.5 h-3.5 ${isSpotifyPlaying ? "text-green-500 animate-pulse" : "text-zinc-400"}`} />
+                {isSpotifyPlaying ? "Live Sync Active via Spotify Web API" : "Spotify Sync Connected (Paused)"}
               </>
             ) : (
               <>
@@ -252,11 +311,11 @@ export default function Soundtrack() {
             {/* Spinning Album Art */}
             <div className="flex flex-col items-center justify-center mb-6">
               <motion.div
-                animate={(isLiveSpotify || isPlaying) ? { rotate: 360 } : {}}
+                animate={isActivelyPlaying ? { rotate: 360 } : {}}
                 transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
                 className="w-40 h-40 rounded-full border-4 border-border-light/40 dark:border-border-dark/40 shadow-inner flex items-center justify-center relative overflow-hidden bg-zinc-900"
               >
-                {isLiveSpotify && spotifyData.albumImageUrl ? (
+                {isLiveSpotify && spotifyData?.albumImageUrl ? (
                   // Spotify Album Art
                   <img 
                     src={spotifyData.albumImageUrl} 
@@ -286,7 +345,7 @@ export default function Soundtrack() {
                 <motion.span
                   key={i}
                   animate={
-                    (isLiveSpotify || isPlaying)
+                    isActivelyPlaying
                       ? { height: [4, 24, 8, 28, 4][i % 5] }
                       : { height: 4 }
                   }
@@ -304,7 +363,7 @@ export default function Soundtrack() {
             <div className="text-center mb-6">
               <AnimatePresence mode="wait">
                 <motion.div
-                  key={isLiveSpotify ? spotifyData.title : defaultTrack.title}
+                  key={isLiveSpotify ? spotifyData?.title : defaultTrack.title}
                   initial={{ opacity: 0, y: 5 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -5 }}
@@ -312,17 +371,17 @@ export default function Soundtrack() {
                 >
                   <h3 className="text-xl font-bold text-primary-light dark:text-primary-dark tracking-tight truncate max-w-[280px] mx-auto">
                     {isLiveSpotify ? (
-                      <a href={spotifyData.songUrl} target="_blank" rel="noopener noreferrer" className="hover:text-green-500 transition-colors">
-                        {spotifyData.title}
+                      <a href={spotifyData?.songUrl} target="_blank" rel="noopener noreferrer" className="hover:text-green-500 transition-colors">
+                        {spotifyData?.title}
                       </a>
                     ) : (
                       defaultTrack.title
                     )}
                   </h3>
                   <p className="text-sm font-heading font-medium text-secondary-light dark:text-secondary-dark mt-1 truncate max-w-[280px] mx-auto">
-                    {isLiveSpotify ? spotifyData.artist : defaultTrack.artist} •{" "}
+                    {isLiveSpotify ? spotifyData?.artist : defaultTrack.artist} •{" "}
                     <span className={isLiveSpotify ? "text-green-500 font-bold" : "text-accent-light dark:text-accent-dark"}>
-                      {isLiveSpotify ? "Spotify" : defaultTrack.genre}
+                      {isLiveSpotify ? (isSpotifyPlaying ? "Spotify" : "Spotify (Paused)") : defaultTrack.genre}
                     </span>
                   </p>
                 </motion.div>
@@ -344,7 +403,7 @@ export default function Soundtrack() {
               {/* Mute / Spotify Icon Button */}
               {isLiveSpotify ? (
                 <a
-                  href={spotifyData.songUrl}
+                  href={spotifyData?.songUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-green-500 hover:text-green-400 transition-colors p-2"
@@ -382,13 +441,17 @@ export default function Soundtrack() {
                 {isLiveSpotify ? (
                   // Live Play Button -> Links directly to Spotify
                   <a
-                    href={spotifyData.songUrl}
+                    href={spotifyData?.songUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-12 h-12 rounded-full bg-green-500 text-bg-light dark:text-bg-dark flex items-center justify-center shadow hover:scale-105 active:scale-95 transition-all duration-200"
-                    aria-label="Listen along on Spotify"
+                    aria-label={isSpotifyPlaying ? "Pause on Spotify (Opens Spotify)" : "Play on Spotify (Opens Spotify)"}
                   >
-                    <Play className="w-5 h-5 fill-current ml-0.5 text-zinc-950" />
+                    {isSpotifyPlaying ? (
+                      <Pause className="w-5 h-5 fill-current text-zinc-950" />
+                    ) : (
+                      <Play className="w-5 h-5 fill-current ml-0.5 text-zinc-950" />
+                    )}
                   </a>
                 ) : (
                   // Offline Play Button -> Triggers local Web Audio loops
