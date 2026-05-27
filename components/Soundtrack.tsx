@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 const TRACKS = [
   {
     title: "Lo-Fi Coffee Code",
-    artist: "Vibe-Coding Sessions",
+    artist: "Chill Coding Sessions",
     genre: "Chillhop",
     frequency: 110, // Base pitch for synth
     color: "from-amber-500/20 to-orange-600/20",
@@ -163,7 +163,7 @@ export default function Soundtrack() {
             The Coding Soundtrack
           </h2>
           <p className="text-secondary-light dark:text-secondary-dark text-[0.98rem] leading-relaxed mb-6">
-            Music is a core part of the vibe-coding experience. 
+            Music is a core part of my software development experience. 
             Here is an interactive soundtrack panel built with Next.js and the **Web Audio API**. 
             Click play to trigger gentle, synthesized lo-fi chords generated natively in your browser while you explore!
           </p>

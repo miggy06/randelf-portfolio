@@ -68,11 +68,7 @@ export default function Hero() {
             <strong className="text-primary-light dark:text-primary-dark font-semibold">
               Jose Maria College Foundation Inc.
             </strong>
-            . I am still learning, and I come clean in{" "}
-            <strong className="text-primary-light dark:text-primary-dark font-semibold">
-              vibe-coding
-            </strong>{" "}
-            to build, understand, and prototype software with speed.
+            , dedicated to mastering software development and excited about everything there is to learn in the tech world.
           </motion.p>
 
           {/* CTAs */}

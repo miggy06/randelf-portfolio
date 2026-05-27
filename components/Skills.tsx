@@ -16,12 +16,12 @@ const SKILLS = [
   },
   {
     icon: GitBranch,
-    category: "AI & Orchestration",
+    category: "Technical Concepts",
     items: [
-      "Prompt Engineering",
-      "Git & Version Control",
-      "System Architecture Design",
-      "AI-Collaborative Workflows",
+      "Git & GitHub Flow",
+      "Algorithms & Data Flow",
+      "Mobile-First Development",
+      "Developer Console Debugging",
     ],
   },
   {
