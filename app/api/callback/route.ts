@@ -39,7 +39,7 @@ export async function GET(request: Request) {
       body: new URLSearchParams({
         grant_type: "authorization_code",
         code,
-        redirect_uri: "http://localhost:3000/api/callback",
+        redirect_uri: "http://127.0.0.1:3000/api/callback",
       }),
     });
 
