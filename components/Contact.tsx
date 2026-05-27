@@ -146,7 +146,7 @@ export default function Contact() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="w-full px-4 py-3 rounded-lg border border-transparent bg-input-light dark:bg-input-dark text-primary-light dark:text-primary-dark focus:bg-card-light dark:focus:bg-card-dark focus:border-accent-light dark:focus:border-accent-dark focus:outline-none transition-all duration-200 placeholder-tertiary-light dark:placeholder-tertiary-dark"
-              placeholder="e.g. Alex Johnson"
+              placeholder="e.g. Randelf Amper"
               required
             />
           </div>
@@ -164,7 +164,7 @@ export default function Contact() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full px-4 py-3 rounded-lg border border-transparent bg-input-light dark:bg-input-dark text-primary-light dark:text-primary-dark focus:bg-card-light dark:focus:bg-card-dark focus:border-accent-light dark:focus:border-accent-dark focus:outline-none transition-all duration-200 placeholder-tertiary-light dark:placeholder-tertiary-dark"
-              placeholder="e.g. alex@example.com"
+              placeholder="e.g. gwapo_ko123@gmail.com"
               required
             />
           </div>
@@ -182,7 +182,7 @@ export default function Contact() {
               onChange={(e) => setMessage(e.target.value)}
               rows={4}
               className="w-full px-4 py-3 rounded-lg border border-transparent bg-input-light dark:bg-input-dark text-primary-light dark:text-primary-dark focus:bg-card-light dark:focus:bg-card-dark focus:border-accent-light dark:focus:border-accent-dark focus:outline-none transition-all duration-200 placeholder-tertiary-light dark:placeholder-tertiary-dark resize-y min-h-[120px]"
-              placeholder="Hi Randelf, we would love to discuss a developer internship..."
+              placeholder="Randelf, nganong gwapo mn kaayo ka oie"
               required
             />
           </div>
