@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import StatusTicker from "./StatusTicker";
 
 export default function Hero() {
   const containerVariants = {
@@ -88,6 +89,11 @@ export default function Hero() {
             >
               Explore My Journey
             </a>
+          </motion.div>
+
+          {/* Dynamic Status Ticker */}
+          <motion.div variants={itemVariants}>
+            <StatusTicker />
           </motion.div>
         </motion.div>
 

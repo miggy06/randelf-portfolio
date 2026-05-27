@@ -6,6 +6,7 @@ import About from "@/components/About";
 import VibeLab from "@/components/VibeLab";
 import Sandbox from "@/components/Sandbox";
 import Skills from "@/components/Skills";
+import Setup from "@/components/Setup";
 import Contact from "@/components/Contact";
 
 export default function Home() {
@@ -18,6 +19,7 @@ export default function Home() {
         <VibeLab />
         <Sandbox />
         <Skills />
+        <Setup />
         <Contact />
       </main>
       
