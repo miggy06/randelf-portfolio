@@ -40,7 +40,7 @@ export default function About() {
               As a student developer at Jose Maria College Foundation Inc., my primary objective is to absorb knowledge, master technical skills, and apply structured programming to real-world applications.
             </p>
             <p>
-              I thrive on solving logic puzzles, constructing interactive interfaces, and understanding how modern systems communicate. I am highly motivated to secure an internship where I can contribute to projects while being mentored by experienced engineers.
+              I thrive on solving logic puzzles, constructing interactive interfaces, and understanding how modern systems communicate. When I am not co-piloting code, you can find me gaming, building custom PCs, or configuring tech hardware systems.
             </p>
           </div>
         </motion.div>

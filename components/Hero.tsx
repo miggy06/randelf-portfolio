@@ -67,11 +67,11 @@ export default function Hero() {
             <strong className="text-primary-light dark:text-primary-dark font-semibold">
               Jose Maria College Foundation Inc.
             </strong>
-            , passionate about coding, interfaces, and excited about{" "}
+            . I am still learning, and I come clean in{" "}
             <strong className="text-primary-light dark:text-primary-dark font-semibold">
-              everything there is to learn
+              vibe-coding
             </strong>{" "}
-            in the tech world.
+            to build, understand, and prototype software with speed.
           </motion.p>
 
           {/* CTAs */}

@@ -3,6 +3,7 @@
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import About from "@/components/About";
+import VibeLab from "@/components/VibeLab";
 import Sandbox from "@/components/Sandbox";
 import Skills from "@/components/Skills";
 import Contact from "@/components/Contact";
@@ -14,6 +15,7 @@ export default function Home() {
       <main className="max-w-6xl mx-auto px-6">
         <Hero />
         <About />
+        <VibeLab />
         <Sandbox />
         <Skills />
         <Contact />
